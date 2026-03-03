@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Build output
+build/
+
+# Environment files (secrets)
+.env
+.env.local
+backend/.env
+
+# Uploaded temp files
+backend/uploads/
+
+# Claude Code
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
