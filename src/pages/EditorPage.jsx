@@ -15,7 +15,6 @@ import { v4 as uuidv4 } from 'uuid';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const QUESTION_TYPES = ['MCQ', 'True/False', 'Subjective'];
 const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Social Science', 'Computer Science'];
 
 const emptyQuestion = () => ({
@@ -320,7 +319,7 @@ function PagedPreview({ paperData }) {
       prev.length === starts.length && prev.every((v, i) => Math.abs(v - starts[i]) < 2)
         ? prev : starts
     );
-  });
+  }); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
