@@ -267,7 +267,14 @@ export default function PdfToolsPage() {
         return;
       }
 
-      const parsed = buildResult(questions, false); // Gemini handles math, no warning needed
+      const parsed = {
+        questions,
+        mathWarning: false,
+        hasAnswers: questions.some(q => q.answer),
+        mcqCount: questions.filter(q => q.type === 'MCQ').length,
+        tfCount: questions.filter(q => q.type === 'True/False').length,
+        subjCount: questions.filter(q => q.type === 'Subjective').length,
+      };
       setResult({
         type: 'parsed-questions',
         title: `🤖 ${questions.length} question${questions.length !== 1 ? 's' : ''} extracted by Gemini AI`,
