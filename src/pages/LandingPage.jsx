@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Zap, Download, Shield, Star, ChevronRight, FileText, Camera, Layers } from 'lucide-react';
+import { BookOpen, Zap, Download, Shield, Star, FileText, Camera, Layers } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();

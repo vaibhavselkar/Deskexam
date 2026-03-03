@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FileText, CheckCircle, Loader2, Copy,
   Download, RefreshCw, AlertCircle, BarChart2, Lightbulb, FileCode,
-  Plus, Trash2, ChevronUp, ChevronDown, Edit3, ArrowLeft,
+  Plus, Trash2, ChevronUp, ChevronDown, ArrowLeft,
 } from 'lucide-react';
 import Navbar from '../components/auth/Navbar';
 import LatexFormatModal from '../components/editor/LatexFormatModal';
@@ -92,7 +92,7 @@ async function extractTextFromPDF(file) {
 
 // ── Math token regex: digits + Greek letters + simple variables (≤5 chars)
 // Used to detect fraction components that appear on consecutive lines in PDFs.
-const MATH_TOK = /^[0-9πωλΩθαβγA-Za-z\+\-\.]{1,5}$/;
+const MATH_TOK = /^[-0-9πωλΩθαβγA-Za-z+.]{1,5}$/;
 // Common English words that must NOT be treated as fraction components
 const STOP_WORDS = /^(is|of|to|by|in|at|on|as|an|the|and|or|it|be|do|we|he|she|for|not|but|has|had|was|are|were|will|from|with|have|this|that|they|then|when|where|which|what|who|how|why|its|upon|such|each|more|than|less|per|same|one|two|three|four)$/i;
 
@@ -103,7 +103,7 @@ function fixFractions(text) {
   //        "π\n2"    → "π/2"   (Greek-letter fraction)
   // Guard: both tokens must be ≤5 chars, match MATH_TOK, not be English stopwords.
   return text.replace(
-    /^([0-9πωλΩθαβγA-Za-z\+\-\.]{1,5})\n([0-9πωλΩθαβγA-Za-z\+\-\.]{1,5})$/gm,
+    /^([-0-9πωλΩθαβγA-Za-z+.]{1,5})\n([-0-9πωλΩθαβγA-Za-z+.]{1,5})$/gm,
     (match, n, d) => {
       if (STOP_WORDS.test(n) || STOP_WORDS.test(d)) return match;
       if (!MATH_TOK.test(n) || !MATH_TOK.test(d)) return match;
@@ -178,7 +178,7 @@ function parsePdfQuestions(rawText) {
     const type   = options.length >= 2 ? 'MCQ' : isTF ? 'True/False' : 'Subjective';
 
     // 7. Extract answer if present (e.g. "Ans: B" or "Answer: C")
-    const ansMatch = block.match(/\b(?:Ans\.?|Answer)\s*[:\-]?\s*([A-D])\b/i);
+    const ansMatch = block.match(/\b(?:Ans\.?|Answer)\s*[:-]?\s*([A-D])\b/i);
     const answer   = ansMatch ? ansMatch[1].toUpperCase() : '';
 
     questions.push({
@@ -319,72 +319,6 @@ export default function PdfToolsPage() {
   const handleFileSelect = (e) => {
     const f = e.target.files[0];
     if (f) { setFile(f); setResult(null); setPdfError(''); }
-  };
-
-  const processFile = async (type) => {
-    if (!file) return;
-    setProcessing(true); setPdfError(''); setResult(null);
-
-    try {
-      if (type === 'photo-to-latex') {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setResult({
-          type: 'text', title: 'Photo Preview (Demo)',
-          content: 'Photo-to-LaTeX OCR requires an AI backend integration (e.g. Google Vision API).\n\nThis feature is shown as a demo. For now, please type your question in the Editor and use LaTeX math syntax like $\\frac{1}{2}$ or $x^2 + y^2 = r^2$.',
-        });
-      } else {
-        // For non-Gemini extraction (fallback), use the same logic but without AI
-        const rawText = await extractTextFromPDF(file);
-
-        if (!rawText.trim()) {
-          setPdfError('No text could be extracted. The PDF may be scanned/image-based. Try a text-based PDF.');
-          setProcessing(false);
-          return;
-        }
-
-        if (type === 'pdf-to-editor') {
-          const parsed = parsePdfQuestions(rawText);
-
-          if (parsed.questions.length === 0) {
-            // Fallback: pass raw text and let user edit
-            setResult({
-              type: 'raw-text-editor',
-              title: 'No questions detected — showing raw text',
-              rawText,
-              parsed,
-            });
-          } else {
-            setResult({
-              type: 'parsed-questions',
-              title: `${parsed.questions.length} question${parsed.questions.length > 1 ? 's' : ''} detected`,
-              rawText,
-              parsed,
-            });
-          }
-
-        } else if (type === 'pdf-to-latex') {
-          setResult({ type: 'latex-code', title: 'LaTeX Source', content: textToLatex(rawText) });
-
-        } else if (type === 'pdf-to-ppt') {
-          const lines = rawText.split('\n').filter(l => l.trim());
-          const slides = [];
-          let current = [];
-          for (const line of lines) {
-            if (/^\[Page \d+\]/.test(line)) {
-              if (current.length) slides.push(current);
-              current = [line];
-            } else { current.push(line); }
-          }
-          if (current.length) slides.push(current);
-          const pptText = slides.map((s, i) => `=== Slide ${i + 1} ===\n${s.join('\n')}`).join('\n\n');
-          setResult({ type: 'ppt-text', title: `${slides.length} Slide Outline Ready`, content: pptText });
-        }
-      }
-    } catch (err) {
-      console.error('PDF processing error:', err);
-      setPdfError(`Failed to read PDF: ${err.message}. Make sure the file is a valid PDF.`);
-    }
-    setProcessing(false);
   };
 
   const openInEditor = () => {

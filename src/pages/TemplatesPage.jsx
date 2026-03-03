@@ -67,15 +67,6 @@ const CATEGORIES = ['All', 'Board Exams', 'Competitive', 'Class Tests', 'School'
 // ─── Mini Paper Previews ──────────────────────────────────────────────────────
 // Each renders a scaled-down visual that actually looks like the paper format.
 
-function Line({ w = 'full', h = 1, color = '#e2e8f0', className = '' }) {
-  const widths = { full: '100%', '5/6': '83%', '4/5': '80%', '3/4': '75%', '2/3': '66%', '1/2': '50%', '1/3': '33%' };
-  return (
-    <div
-      className={className}
-      style={{ height: h, backgroundColor: color, borderRadius: 2, width: widths[w] || w }}
-    />
-  );
-}
 
 function Bubble({ filled, color }) {
   return (
