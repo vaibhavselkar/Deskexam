@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Zap, Star, Lock } from 'lucide-react';
+import { X, Zap, Lock } from 'lucide-react';
 
 export default function PaywallModal({ onClose }) {
   const navigate = useNavigate();

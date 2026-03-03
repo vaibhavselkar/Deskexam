@@ -23,9 +23,7 @@ function renderMixedContent(text) {
   if (!text) return '';
 
   // Split on $$ first (display math), then $ (inline)
-  const parts = [];
   let remaining = text;
-  let key = 0;
 
   // Process display math $$...$$
   remaining = remaining.replace(/\$\$([\s\S]+?)\$\$/g, (match, latex) => {
