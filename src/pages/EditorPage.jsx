@@ -276,6 +276,7 @@ function PagedPreview({ paperData }) {
   // pageBreaks[i] = natural-px Y where page i starts (same algorithm as PDF download)
   const [pageBreaks, setPageBreaks] = useState([0]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper || wrapper.scrollHeight === 0) return;
@@ -319,7 +320,7 @@ function PagedPreview({ paperData }) {
       prev.length === starts.length && prev.every((v, i) => Math.abs(v - starts[i]) < 2)
         ? prev : starts
     );
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -940,8 +941,7 @@ async function verifyPaperQuality(paperData) {
 
   // Check for proper question distribution
   const mcqCount = mcqQuestions.length;
-  const tfCount = questions.filter(q => q.type === 'True/False').length;
-  const subjectiveCount = questions.filter(q => q.type === 'Subjective').length;
+const subjectiveCount = questions.filter(q => q.type === 'Subjective').length;
 
   if (mcqCount === 0 && subjectiveCount === 0) {
     issues.push('⚠️ Paper should have a mix of question types for better assessment');
