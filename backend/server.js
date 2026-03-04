@@ -6,19 +6,15 @@ const connectDB = require('./config/db');
 const app = express();
 
 // Connect to MongoDB
-connectDB(); 
+connectDB();
 
 // Middleware
-<<<<<<< HEAD
 app.use(cors({ 
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-=======
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
->>>>>>> 8928bae8227a7eb378b32796d9964f9343bfb470
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
