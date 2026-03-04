@@ -8,6 +8,9 @@ import {
 import Navbar from '../components/auth/Navbar';
 import LatexFormatModal from '../components/editor/LatexFormatModal';
 import LatexDocEditor from '../components/editor/LatexDocEditor';
+import PaywallModal from '../components/payment/PaywallModal';
+import { useAuth } from '../hooks/useAuth';
+import { decrementCredit } from '../lib/api';
 
 function downloadText(content, filename) {
   const blob = new Blob([content], { type: 'text/plain' });
@@ -30,6 +33,9 @@ const tabs = [
 
 export default function PdfToolsPage() {
   const navigate = useNavigate();
+  const { profile, canDownload, refreshProfile } = useAuth();
+  const isSubscribed = ['monthly', 'yearly'].includes(profile?.subscription_status);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [activeTab, setActiveTab] = useState('pdf-to-editor');
   const [file, setFile] = useState(null);
   const processing = false;
@@ -868,7 +874,20 @@ export default function PdfToolsPage() {
           initialLatex={result.content}
           filename={file?.name?.replace(/\.(pdf|jpg|jpeg|png|heic)$/i, '') || 'document'}
           onClose={() => setShowLatexEditor(false)}
+          isSubscribed={isSubscribed}
+          onDownload={async (doDownload) => {
+            if (!canDownload()) { setShowPaywall(true); return; }
+            doDownload();
+            if (!isSubscribed) {
+              await decrementCredit();
+              refreshProfile();
+            }
+          }}
         />
+      )}
+
+      {showPaywall && (
+        <PaywallModal onClose={() => setShowPaywall(false)} />
       )}
     </div>
   );

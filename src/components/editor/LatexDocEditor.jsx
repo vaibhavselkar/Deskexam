@@ -120,7 +120,7 @@ function renderLatexToHtml(latex) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-export default function LatexDocEditor({ initialLatex, filename = 'document', onClose }) {
+export default function LatexDocEditor({ initialLatex, filename = 'document', onClose, isSubscribed = false, onDownload }) {
   const [code, setCode] = useState(initialLatex || '');
   const [copied, setCopied] = useState(false);
   const [activePane, setActivePane] = useState('both'); // 'code' | 'preview' | 'both'
@@ -143,7 +143,12 @@ export default function LatexDocEditor({ initialLatex, filename = 'document', on
   };
 
   const handleDownload = () => {
-    downloadLatexFile(code, `${filename.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.tex`);
+    if (onDownload) {
+      // Let parent handle credit check; pass a callback to do the actual download
+      onDownload(() => downloadLatexFile(code, `${filename.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.tex`));
+    } else {
+      downloadLatexFile(code, `${filename.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.tex`);
+    }
   };
 
   const openOverleaf = () => {
@@ -207,12 +212,14 @@ export default function LatexDocEditor({ initialLatex, filename = 'document', on
           >
             <Download className="w-3 h-3" /> Download .tex
           </button>
-          <button
-            onClick={openOverleaf}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-green-700 hover:bg-green-600 rounded-lg transition-colors font-medium"
-          >
-            <ExternalLink className="w-3 h-3" /> Open in Overleaf
-          </button>
+          {isSubscribed && (
+            <button
+              onClick={openOverleaf}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-green-700 hover:bg-green-600 rounded-lg transition-colors font-medium"
+            >
+              <ExternalLink className="w-3 h-3" /> Open in Overleaf
+            </button>
+          )}
         </div>
       </div>
 
