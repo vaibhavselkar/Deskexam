@@ -1,12 +1,11 @@
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs').promises;
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
@@ -62,14 +61,12 @@ Rules:
 
 // POST /api/to-latex  (protected)
 router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
-  let filePath = null;
   try {
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (!geminiApiKey) return res.status(500).json({ message: 'Gemini API key not configured.' });
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-    filePath = req.file.path;
-    const base64 = await fs.readFile(filePath, 'base64');
+    const base64 = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
 
     const latex = await callGeminiForLatex(base64, mimeType, geminiApiKey);
@@ -78,8 +75,6 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('to-latex error:', err);
     res.status(500).json({ message: err.message || 'Failed to generate LaTeX' });
-  } finally {
-    if (filePath) fs.unlink(filePath).catch(() => {});
   }
 });
 

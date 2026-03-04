@@ -1,15 +1,13 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs').promises;
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Store file in memory — no disk access needed (required for Vercel)
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
@@ -79,57 +77,32 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     }
 
     const { file } = req;
-    let rawQuestions = [];
+    const base64 = file.buffer.toString('base64');
+    const mimeType = file.mimetype.startsWith('image/') ? file.mimetype : 'application/pdf';
+    const rawQuestions = await callGemini([base64], mimeType, geminiApiKey);
 
-    try {
-      if (file.mimetype.startsWith('image/')) {
-        // Handle image files
-        const base64 = await fs.readFile(file.path, 'base64');
-        rawQuestions = await callGemini([base64], file.mimetype, geminiApiKey);
-      } else {
-        // Handle PDF files - convert to base64 and send to Gemini
-        // This is a simplified approach that treats the PDF as an image
-        const base64 = await fs.readFile(file.path, 'base64');
-        rawQuestions = await callGemini([base64], 'application/pdf', geminiApiKey);
-      }
-
-      if (rawQuestions.length === 0) {
-        return res.status(400).json({ message: 'Gemini found no questions. Make sure the file contains exam questions.' });
-      }
-
-      const questions = rawQuestions.map(q => ({
-        id: Math.random().toString(36).slice(2),
-        type: q.type === 'MCQ' ? 'MCQ' : q.type === 'True/False' ? 'True/False' : 'Subjective',
-        question: String(q.question || ''),
-        options: q.type === 'MCQ'
-          ? [...(Array.isArray(q.options) ? q.options : []), '', '', '', ''].slice(0, 4)
-          : ['', '', '', ''],
-        answer: String(q.answer || ''),
-        marks: Number(q.marks) || 1,
-        imageUrl: null,
-      }));
-
-      // Clean up uploaded file
-      await fs.unlink(file.path);
-
-      res.json({
-        success: true,
-        questions,
-        message: `🤖 ${questions.length} question${questions.length !== 1 ? 's' : ''} extracted by Gemini AI`,
-        isAiResult: true,
-      });
-
-    } catch (err) {
-      // Clean up uploaded file on error
-      if (file.path) {
-        try {
-          await fs.unlink(file.path);
-        } catch (unlinkErr) {
-          console.error('Failed to cleanup file:', unlinkErr);
-        }
-      }
-      throw err;
+    if (rawQuestions.length === 0) {
+      return res.status(400).json({ message: 'Gemini found no questions. Make sure the file contains exam questions.' });
     }
+
+    const questions = rawQuestions.map(q => ({
+      id: Math.random().toString(36).slice(2),
+      type: q.type === 'MCQ' ? 'MCQ' : q.type === 'True/False' ? 'True/False' : 'Subjective',
+      question: String(q.question || ''),
+      options: q.type === 'MCQ'
+        ? [...(Array.isArray(q.options) ? q.options : []), '', '', '', ''].slice(0, 4)
+        : ['', '', '', ''],
+      answer: String(q.answer || ''),
+      marks: Number(q.marks) || 1,
+      imageUrl: null,
+    }));
+
+    res.json({
+      success: true,
+      questions,
+      message: `🤖 ${questions.length} question${questions.length !== 1 ? 's' : ''} extracted by Gemini AI`,
+      isAiResult: true,
+    });
 
   } catch (err) {
     console.error('PDF extraction error:', err);

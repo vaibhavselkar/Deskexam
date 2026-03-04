@@ -23,5 +23,10 @@ app.use('/api/to-latex', require('./routes/to-latex'));
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Listen only when running directly (not when imported by Vercel)
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;

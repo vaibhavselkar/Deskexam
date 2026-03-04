@@ -1,13 +1,12 @@
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs').promises;
 const PptxGenJS = require('pptxgenjs');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
@@ -148,14 +147,12 @@ function buildPptx(pptTitle, subject, slides) {
 
 // POST /api/pdf-to-ppt  — extract slides JSON (for preview)
 router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
-  let filePath = null;
   try {
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (!geminiApiKey) return res.status(500).json({ message: 'Gemini API key not configured on server.' });
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-    filePath = req.file.path;
-    const base64 = await fs.readFile(filePath, 'base64');
+    const base64 = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
     const description = req.body.description || '';
 
@@ -170,8 +167,6 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('PDF-to-PPT error:', err);
     res.status(500).json({ message: err.message || 'Failed to generate presentation' });
-  } finally {
-    if (filePath) fs.unlink(filePath).catch(() => {});
   }
 });
 
