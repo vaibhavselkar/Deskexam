@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, LayoutDashboard, FileText, Layers, File, CreditCard, LogOut, Menu, X, Settings } from 'lucide-react';
+import { BookOpen, LayoutDashboard, FileText, Layers, File, CreditCard, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function Navbar() {
@@ -80,10 +80,6 @@ export default function Navbar() {
           {(profile?.full_name || profile?.email || 'U')[0].toUpperCase()}
         </div>
 
-        {/* Settings */}
-        <button onClick={() => navigate('/settings')} className="text-blue-300 hover:text-white transition-colors" title="Settings">
-          <Settings className="w-4 h-4" />
-        </button>
 
         {/* Logout */}
         <button onClick={handleLogout} className="text-blue-300 hover:text-white transition-colors" title="Sign out">
@@ -113,12 +109,6 @@ export default function Navbar() {
             className="flex items-center gap-3 w-full px-6 py-4 text-gold hover:bg-white/10 transition-all border-t border-blue-800"
           >
             <CreditCard className="w-4 h-4" /> Upgrade Plan
-          </button>
-          <button
-            onClick={() => { navigate('/settings'); setMobileOpen(false); }}
-            className="flex items-center gap-3 w-full px-6 py-4 text-blue-300 hover:bg-white/10 transition-all"
-          >
-            <Settings className="w-4 h-4" /> Settings
           </button>
           <button onClick={handleLogout} className="flex items-center gap-3 w-full px-6 py-4 text-blue-300 hover:bg-white/10 transition-all">
             <LogOut className="w-4 h-4" /> Sign Out
