@@ -622,7 +622,7 @@ export default function EditorPage() {
         return { top: r.top - cloneRect.top, bottom: r.bottom - cloneRect.top };
       });
 
-      const SCALE = 3; // 288 DPI
+      const SCALE = 2; // 192 DPI
       const PADDING_MM = 10;
 
       // html-to-image uses SVG foreignObject — no scroll/position offset bugs
@@ -638,7 +638,6 @@ export default function EditorPage() {
       tmpRoot.unmount();
       document.body.removeChild(offscreen);
 
-      const topCrop = 0;
       const effectiveHeight = canvas.height;
       const avoidRangesPx = avoidRanges.map(r => ({
         top:    Math.round(r.top    * SCALE),

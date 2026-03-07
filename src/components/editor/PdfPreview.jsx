@@ -172,7 +172,6 @@ export default function PdfPreview({ paperData }) {
       <div style={{ borderTop: `2px solid ${accentColor}`, marginTop: 24, paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#666' }}>
         <span>{metadata.instituteName || 'ShikshaSetu'}</span>
         <span>*** End of Paper ***</span>
-        <span>Page 1 of 1</span>
       </div>
     </div>
   );
