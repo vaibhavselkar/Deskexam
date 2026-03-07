@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileText, Clock, Download, Trash2, Edit2, Star, TrendingUp, BookOpen, Zap, Layers, Camera, Cloud } from 'lucide-react';
+import { Plus, FileText, Clock, Download, Trash2, Edit2, Star, TrendingUp, BookOpen, Zap, Layers, Camera, Cloud, Copy } from 'lucide-react';
 import Navbar from '../components/auth/Navbar';
 import { useAuth } from '../hooks/useAuth';
-import { getPapers, deletePaper } from '../lib/api';
+import { getPapers, deletePaper, savePaper } from '../lib/api';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
@@ -24,6 +24,12 @@ export default function Dashboard() {
     if (!window.confirm('Delete this paper?')) return;
     await deletePaper(id);
     setPapers(papers.filter(p => p.id !== id));
+  };
+
+  const handleDuplicate = async (paper) => {
+    const { id, _id, created_at, updated_at, ...rest } = paper;
+    const { data } = await savePaper({ ...rest, title: `Copy of ${paper.title}` });
+    if (data) setPapers(prev => [data, ...prev]);
   };
 
   const isSubscribed = ['monthly', 'yearly'].includes(profile?.subscription_status)
@@ -229,10 +235,13 @@ export default function Dashboard() {
                         {paper.subject}
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => navigate(`/editor/${paper.id}`)} className="p-1.5 text-gray-400 hover:text-primary-900 transition-colors">
+                        <button onClick={() => navigate(`/editor/${paper.id}`)} title="Edit" className="p-1.5 text-gray-400 hover:text-primary-900 transition-colors">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(paper.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                        <button onClick={() => handleDuplicate(paper)} title="Duplicate" className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors">
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(paper.id)} title="Delete" className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
