@@ -6,6 +6,8 @@
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.13.6",
     "date-fns": "^3.1.0",
+    "dom-to-image-more": "^3.7.2",
+    "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "katex": "^0.16.9",
