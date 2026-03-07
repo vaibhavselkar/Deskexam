@@ -10,6 +10,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -212,6 +213,15 @@ export default function Dashboard() {
                 <Plus className="w-4 h-4" /> New Paper
               </button>
             </div>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search papers by title, subject or class..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-primary-900"
+              />
+            </div>
 
             {loading ? (
               <div className="grid md:grid-cols-3 gap-4">
@@ -228,7 +238,10 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {papers.map(paper => (
+                {papers.filter(p => {
+                  const q = search.toLowerCase();
+                  return !q || p.title?.toLowerCase().includes(q) || p.subject?.toLowerCase().includes(q) || p.class_name?.toLowerCase().includes(q);
+                }).map(paper => (
                   <div key={paper.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all template-card">
                     <div className="flex items-start justify-between mb-3">
                       <div className={`text-xs font-semibold px-2 py-1 rounded-full ${subjectColors[paper.subject] || 'bg-gray-100 text-gray-600'}`}>
