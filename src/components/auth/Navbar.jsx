@@ -27,11 +27,9 @@ export default function Navbar() {
   return (
     <nav className="bg-primary-900 text-white h-16 flex items-center px-6 gap-4 fixed top-0 left-0 right-0 z-50 shadow-xl">
       {/* Logo */}
-      <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 mr-4">
-        <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
-          <BookOpen className="w-4 h-4 text-primary-900" />
-        </div>
-        <span className="font-serif font-bold text-lg hidden sm:block">ShikshaSetu</span>
+      <button onClick={() => navigate('/')} className="flex items-center gap-2 mr-4">
+        <img src="/s2.webp" alt="Deskexam" className="w-8 h-8 rounded-lg object-contain" />
+        <span className="font-serif font-bold text-lg hidden sm:block">Deskexam</span>
       </button>
 
       {/* Desktop Nav */}

@@ -170,7 +170,7 @@ export default function PdfPreview({ paperData }) {
 
       {/* Footer */}
       <div style={{ borderTop: `2px solid ${accentColor}`, marginTop: 24, paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#666' }}>
-        <span>{metadata.instituteName || 'ShikshaSetu'}</span>
+        <span>{metadata.instituteName || 'Deskexam'}</span>
         <span>*** End of Paper ***</span>
       </div>
     </div>

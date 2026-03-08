@@ -581,7 +581,7 @@ export default function PdfToolsPage() {
                   {(activeTab === 'pdf-to-editor'
                     ? [
                         'Upload any text-based PDF question paper',
-                        'ShikshaSetu detects questions, options & answers',
+                        'Deskexam detects questions, options & answers',
                         'Opens directly in the editor with structured cards',
                       ]
                     : activeTab === 'pdf-to-ppt'

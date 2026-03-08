@@ -282,6 +282,21 @@ export default function Dashboard() {
 
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-8 px-6 mt-10">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <img src="/s2.webp" alt="Deskexam" className="w-6 h-6 rounded object-contain" />
+            <span className="font-serif font-bold text-white">Deskexam</span>
+          </div>
+          <p className="text-sm">© 2024 Deskexam. Made with ❤️ for Indian Teachers.</p>
+          <div className="flex gap-4 text-sm">
+            <a href="mailto:deskexamsupporter@gmail.com" className="hover:text-white">deskexamsupporter@gmail.com</a>
+            <a href="https://wa.me/918625969689" target="_blank" rel="noopener noreferrer" className="hover:text-white">WhatsApp</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

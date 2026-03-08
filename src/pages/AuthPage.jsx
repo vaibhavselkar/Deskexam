@@ -91,9 +91,9 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-xl mb-4">
-            <BookOpen className="w-8 h-8 text-primary-900" />
+            <img src="/s2.webp" alt="Deskexam" className="w-12 h-12 object-contain" />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-white">ShikshaSetu</h1>
+          <h1 className="font-serif text-3xl font-bold text-white">Deskexam</h1>
           <p className="text-blue-300 mt-1">Professional Question Paper Creator</p>
         </div>
 
