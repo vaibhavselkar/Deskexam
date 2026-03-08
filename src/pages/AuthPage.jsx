@@ -23,11 +23,12 @@ export default function AuthPage() {
   const [resetToken, setResetToken] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
-  // Check for reset/verify token in URL
+  // Check for reset/verify/unverified in URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const reset = params.get('reset');
     const verify = params.get('verify');
+    const unverified = params.get('unverified');
     if (reset) {
       setResetToken(reset);
       setMode('reset');
@@ -38,11 +39,13 @@ export default function AuthPage() {
         else setSuccess('Your email has been verified! You can now sign in.');
         setMode('signin');
       });
+    } else if (unverified) {
+      setError('Please verify your email before accessing the dashboard. Check your inbox for the verification link.');
     }
   }, [location.search]);
 
   useEffect(() => {
-    if (user) navigate('/dashboard', { replace: true });
+    if (user && user.emailVerified) navigate('/dashboard', { replace: true });
   }, [user, navigate]);
 
   const reset = () => { setError(''); setSuccess(''); setUnverifiedEmail(''); };
