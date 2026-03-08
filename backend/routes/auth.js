@@ -64,12 +64,13 @@ router.get('/verify-email', async (req, res) => {
   }
 });
 
-// POST /api/auth/resend-verification
-router.post('/resend-verification', authMiddleware, async (req, res) => {
+// POST /api/auth/resend-verification  (public — takes email)
+router.post('/resend-verification', async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    if (user.emailVerified) return res.json({ message: 'Email already verified.' });
+    const { email } = req.body;
+    const user = email ? await User.findOne({ email }) : null;
+    // Always respond the same to prevent enumeration
+    if (!user || user.emailVerified) return res.json({ message: 'If this email exists and is unverified, a link has been sent.' });
 
     const verifyToken = crypto.randomBytes(32).toString('hex');
     user.emailVerifyToken = verifyToken;
@@ -98,6 +99,9 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Incorrect email or password' });
+    }
+    if (!user.emailVerified) {
+      return res.status(403).json({ message: 'Please verify your email before signing in. Check your inbox for the verification link.', unverified: true });
     }
     const token = signToken(user._id);
     res.json({ token, user });

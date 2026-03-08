@@ -29,7 +29,8 @@ export const signInWithPassword = async (email, password) => {
     localStorage.setItem('ss_token', data.token);
     return { data, error: null };
   } catch (err) {
-    return { data: null, error: { message: err.response?.data?.message || err.message } };
+    const resData = err.response?.data || {};
+    return { data: null, error: { message: resData.message || err.message, unverified: !!resData.unverified } };
   }
 };
 
@@ -75,9 +76,9 @@ export const verifyEmail = async (token) => {
   }
 };
 
-export const resendVerification = async () => {
+export const resendVerification = async (email) => {
   try {
-    const { data } = await api.post('/auth/resend-verification');
+    const { data } = await api.post('/auth/resend-verification', { email });
     return { data, error: null };
   } catch (err) {
     return { data: null, error: { message: err.response?.data?.message || err.message } };

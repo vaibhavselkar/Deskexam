@@ -45,7 +45,7 @@ export default function Dashboard() {
 
   const handleResend = async () => {
     setResendStatus('sending');
-    const { error } = await resendVerification();
+    const { error } = await resendVerification(profile?.email);
     setResendStatus(error ? 'error' : 'sent');
   };
 

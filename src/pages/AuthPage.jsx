@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
-import { signUpWithPassword, signInWithPassword, forgotPassword, resetPassword, googleSignIn, verifyEmail } from '../lib/api';
+import { signUpWithPassword, signInWithPassword, forgotPassword, resetPassword, googleSignIn, verifyEmail, resendVerification as resendVerificationApi } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 
 export default function AuthPage() {
@@ -21,6 +21,7 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [resetToken, setResetToken] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   // Check for reset/verify token in URL
   useEffect(() => {
@@ -44,7 +45,15 @@ export default function AuthPage() {
     if (user) navigate('/dashboard', { replace: true });
   }, [user, navigate]);
 
-  const reset = () => { setError(''); setSuccess(''); };
+  const reset = () => { setError(''); setSuccess(''); setUnverifiedEmail(''); };
+
+  const handleResendFromLogin = async () => {
+    setLoading(true);
+    const { error: err } = await resendVerificationApi(unverifiedEmail);
+    if (!err) { setSuccess('Verification email sent! Check your inbox.'); setUnverifiedEmail(''); setError(''); }
+    else setError('Could not resend. Please try again.');
+    setLoading(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,9 +69,11 @@ export default function AuthPage() {
       else { await refreshProfile(); }
 
     } else if (mode === 'signin') {
-      const { error: err } = await signInWithPassword(email, password);
-      if (err) setError(err.message);
-      else { await refreshProfile(); }
+      const { data, error: err } = await signInWithPassword(email, password);
+      if (err) {
+        if (err.unverified) setUnverifiedEmail(email);
+        setError(err.message);
+      } else { await refreshProfile(); }
 
     } else if (mode === 'forgot') {
       const { error: err } = await forgotPassword(email);
@@ -202,7 +213,17 @@ export default function AuthPage() {
               </div>
             )}
 
-            {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">{error}</div>}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
+                {error}
+                {unverifiedEmail && (
+                  <button type="button" onClick={handleResendFromLogin} disabled={loading}
+                    className="mt-2 block w-full text-center text-xs font-semibold text-red-700 underline hover:text-red-900 disabled:opacity-60">
+                    Resend verification email
+                  </button>
+                )}
+              </div>
+            )}
             {success && <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm">{success}</div>}
 
             <button type="submit" disabled={loading}
