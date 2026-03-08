@@ -37,6 +37,35 @@ export const signOut = () => {
   localStorage.removeItem('ss_token');
 };
 
+export const forgotPassword = async (email) => {
+  try {
+    const { data } = await api.post('/auth/forgot-password', { email });
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
+export const resetPassword = async (token, password) => {
+  try {
+    const { data } = await api.post('/auth/reset-password', { token, password });
+    localStorage.setItem('ss_token', data.token);
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
+export const googleSignIn = async (credential) => {
+  try {
+    const { data } = await api.post('/auth/google', { credential });
+    localStorage.setItem('ss_token', data.token);
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
 export const getProfile = async () => {
   try {
     const { data } = await api.get('/auth/profile');
