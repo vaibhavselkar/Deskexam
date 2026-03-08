@@ -66,10 +66,15 @@ export default function AuthPage() {
       if (password.length < 6) { setError('Password must be at least 6 characters.'); setLoading(false); return; }
       const { error: err } = await signUpWithPassword(email, password, name.trim());
       if (err) setError(err.message);
-      else { await refreshProfile(); }
+      else {
+        // Don't log in — require email verification first
+        localStorage.removeItem('ss_token');
+        setSuccess('Account created! Please check your email and click the verification link before signing in.');
+        setMode('signin');
+      }
 
     } else if (mode === 'signin') {
-      const { data, error: err } = await signInWithPassword(email, password);
+      const { error: err } = await signInWithPassword(email, password);
       if (err) {
         if (err.unverified) setUnverifiedEmail(email);
         setError(err.message);
