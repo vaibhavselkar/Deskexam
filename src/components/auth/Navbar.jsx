@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, LayoutDashboard, FileText, Layers, File, CreditCard, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, Layers, File, CreditCard, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function Navbar() {
