@@ -13,6 +13,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'https://shikshasetu-seven.vercel.app',
+  'https://deskexam.com',
+  'https://www.deskexam.com',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
