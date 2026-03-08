@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
-import { signUpWithPassword, signInWithPassword, forgotPassword, resetPassword, googleSignIn } from '../lib/api';
+import { signUpWithPassword, signInWithPassword, forgotPassword, resetPassword, googleSignIn, verifyEmail } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 
 export default function AuthPage() {
@@ -10,7 +10,7 @@ export default function AuthPage() {
   const location = useLocation();
   const { user, refreshProfile } = useAuth();
 
-  const [mode, setMode] = useState('signin'); // 'signin' | 'signup' | 'forgot' | 'reset'
+  const [mode, setMode] = useState('signin'); // 'signin' | 'signup' | 'forgot' | 'reset' | 'verifying'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -22,13 +22,21 @@ export default function AuthPage() {
   const [success, setSuccess] = useState('');
   const [resetToken, setResetToken] = useState('');
 
-  // Check for reset token in URL
+  // Check for reset/verify token in URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const token = params.get('reset');
-    if (token) {
-      setResetToken(token);
+    const reset = params.get('reset');
+    const verify = params.get('verify');
+    if (reset) {
+      setResetToken(reset);
       setMode('reset');
+    } else if (verify) {
+      setMode('verifying');
+      verifyEmail(verify).then(({ error: err }) => {
+        if (err) setError(err.message);
+        else setSuccess('Your email has been verified! You can now sign in.');
+        setMode('signin');
+      });
     }
   }, [location.search]);
 

@@ -66,6 +66,24 @@ export const googleSignIn = async (credential) => {
   }
 };
 
+export const verifyEmail = async (token) => {
+  try {
+    const { data } = await api.get(`/auth/verify-email?token=${token}`);
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
+export const resendVerification = async () => {
+  try {
+    const { data } = await api.post('/auth/resend-verification');
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
 export const getProfile = async () => {
   try {
     const { data } = await api.get('/auth/profile');

@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, minlength: 6 },
     fullName: { type: String, required: true, trim: true },
     googleId: { type: String, default: null },
+    emailVerified: { type: Boolean, default: false },
+    emailVerifyToken: { type: String, default: null },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
     credits: { type: Number, default: 3 },

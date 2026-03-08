@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, FileText, Clock, Download, Trash2, Edit2, Star, TrendingUp, BookOpen, Zap, Layers, Camera, Cloud, Copy } from 'lucide-react';
 import Navbar from '../components/auth/Navbar';
 import { useAuth } from '../hooks/useAuth';
-import { getPapers, deletePaper, savePaper } from '../lib/api';
+import { getPapers, deletePaper, savePaper, resendVerification } from '../lib/api';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [resendStatus, setResendStatus] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -42,10 +43,30 @@ export default function Dashboard() {
     Chemistry: 'bg-green-100 text-green-700',
   };
 
+  const handleResend = async () => {
+    setResendStatus('sending');
+    const { error } = await resendVerification();
+    setResendStatus(error ? 'error' : 'sent');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="pt-16">
+      {/* Email verification banner */}
+      {profile && !profile.emailVerified && !profile.googleId && (
+        <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm" style={{ marginTop: '64px' }}>
+          <span className="text-amber-800 font-medium">⚠️ Please verify your email address to unlock all features.</span>
+          {resendStatus === 'sent' ? (
+            <span className="text-green-700 font-semibold">✓ Verification email sent!</span>
+          ) : (
+            <button onClick={handleResend} disabled={resendStatus === 'sending'}
+              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors disabled:opacity-60">
+              {resendStatus === 'sending' ? 'Sending...' : 'Resend Verification Email'}
+            </button>
+          )}
+        </div>
+      )}
+      <div className={`${profile && !profile.emailVerified && !profile.googleId ? 'pt-0' : 'pt-16'}`}>
         <div className="max-w-6xl mx-auto px-6 py-8">
 
           {/* Welcome header */}

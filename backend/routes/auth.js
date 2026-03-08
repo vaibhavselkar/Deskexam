@@ -11,6 +11,13 @@ const router = express.Router();
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
+const createTransporter = () => nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
+});
+
+const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:3001';
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -22,9 +29,60 @@ router.post('/register', async (req, res) => {
     if (existing) {
       return res.status(409).json({ message: 'An account with this email already exists' });
     }
-    const user = await User.create({ email, password, fullName });
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const user = await User.create({ email, password, fullName, emailVerifyToken: verifyToken, emailVerified: false });
+
+    const verifyUrl = `${FRONTEND}/auth?verify=${verifyToken}`;
+    try {
+      await createTransporter().sendMail({
+        from: `Deskexam <${process.env.GMAIL_USER}>`,
+        to: email,
+        subject: 'Verify your Deskexam email',
+        html: `<p>Hi ${fullName},</p><p>Please verify your email address by clicking the link below:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>This link does not expire. If you didn't create an account, ignore this email.</p>`,
+      });
+    } catch (_) { /* email failure shouldn't block registration */ }
+
     const token = signToken(user._id);
     res.status(201).json({ token, user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/auth/verify-email?token=...
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+    const user = await User.findOne({ emailVerifyToken: token });
+    if (!user) return res.status(400).json({ message: 'Invalid or already used verification link.' });
+    user.emailVerified = true;
+    user.emailVerifyToken = null;
+    await user.save();
+    res.json({ message: 'Email verified successfully.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/auth/resend-verification
+router.post('/resend-verification', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (user.emailVerified) return res.json({ message: 'Email already verified.' });
+
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerifyToken = verifyToken;
+    await user.save();
+
+    const verifyUrl = `${FRONTEND}/auth?verify=${verifyToken}`;
+    await createTransporter().sendMail({
+      from: `Deskexam <${process.env.GMAIL_USER}>`,
+      to: user.email,
+      subject: 'Verify your Deskexam email',
+      html: `<p>Hi ${user.fullName},</p><p>Click below to verify your email:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
+    });
+    res.json({ message: 'Verification email resent.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -87,17 +145,12 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth?reset=${token}`;
+    const resetUrl = `${FRONTEND}/auth?reset=${token}`;
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-    });
-
-    await transporter.sendMail({
-      from: `ShikshaSetu <${process.env.GMAIL_USER}>`,
+    await createTransporter().sendMail({
+      from: `Deskexam <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: 'Reset your ShikshaSetu password',
+      subject: 'Reset your Deskexam password',
       html: `<p>Hello ${user.fullName},</p><p>Click the link below to reset your password. It expires in 1 hour.</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you didn't request this, ignore this email.</p>`,
     });
 
@@ -139,9 +192,10 @@ router.post('/google', async (req, res) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      user = await User.create({ email, fullName: name, googleId, password: crypto.randomBytes(16).toString('hex') });
-    } else if (!user.googleId) {
-      user.googleId = googleId;
+      user = await User.create({ email, fullName: name, googleId, password: crypto.randomBytes(16).toString('hex'), emailVerified: true });
+    } else {
+      if (!user.googleId) user.googleId = googleId;
+      if (!user.emailVerified) user.emailVerified = true;
       await user.save();
     }
 
