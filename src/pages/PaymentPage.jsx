@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Star, Shield, Smartphone, Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, Check, Shield, Smartphone, CreditCard } from 'lucide-react';
 import Navbar from '../components/auth/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import RazorpayPayment from '../components/payment/RazorpayPayment';
 
 export default function PaymentPage() {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState('monthly');
+  const { refreshProfile } = useAuth();
+  const [selectedPlan, setSelectedPlan] = React.useState('monthly');
 
   const plans = {
     monthly: { label: 'Monthly Pro', amount: 200, duration: '30 days', savings: null },
