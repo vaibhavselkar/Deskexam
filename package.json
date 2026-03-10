@@ -5,6 +5,7 @@
   "dependencies": {
     "@react-oauth/google": "^0.13.4",
     "@supabase/supabase-js": "^2.39.0",
+    "@types/react": "^19.2.14",
     "axios": "^1.13.6",
     "date-fns": "^3.1.0",
     "dom-to-image-more": "^3.7.2",
@@ -14,6 +15,7 @@
     "katex": "^0.16.9",
     "lucide-react": "^0.263.1",
     "pdfjs-dist": "^3.11.174",
+    "razorpay": "^2.9.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",

@@ -33,6 +33,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/papers', require('./routes/papers'));
 app.use('/api/transactions', require('./routes/transactions'));
+app.use('/api/razorpay', require('./routes/razorpay'));
 app.use('/api/pdf-extract', require('./routes/pdf-extraction'));
 app.use('/api/pdf-to-ppt', require('./routes/pdf-to-ppt'));
 app.use('/api/to-latex', require('./routes/to-latex'));

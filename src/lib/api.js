@@ -237,6 +237,39 @@ export const extractPdfWithGemini = async (file) => {
   }
 };
 
+// Razorpay Payment APIs
+export const createRazorpayOrder = async (planType, amount) => {
+  try {
+    const { data } = await api.post('/razorpay/create-order', { planType, amount });
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
+export const verifyRazorpayPayment = async (razorpay_order_id, razorpay_payment_id, razorpay_signature, planType) => {
+  try {
+    const { data } = await api.post('/razorpay/verify-payment', { 
+      razorpay_order_id, 
+      razorpay_payment_id, 
+      razorpay_signature, 
+      planType 
+    });
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
+export const getPaymentHistory = async () => {
+  try {
+    const { data } = await api.get('/razorpay/payment-history');
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: err.response?.data?.message || err.message } };
+  }
+};
+
 // Kept for backward compat — not used
 export const signInWithGoogle = async () => ({
   data: null,

@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Star, Shield, Smartphone, Loader2, CheckCircle, Alert
 import Navbar from '../components/auth/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { createTransaction } from '../lib/api';
+import RazorpayPayment from '../components/payment/RazorpayPayment';
 
 const UPI_ID = 'shikshasetu@upi';
 
@@ -192,9 +193,20 @@ export default function PaymentPage() {
                       ))}
                     </ul>
 
-                    <button onClick={() => setStep(2)} className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2">
-                      Pay ₹{plan.amount} via UPI <ArrowLeft className="w-4 h-4 rotate-180" />
-                    </button>
+                    <div className="space-y-3">
+                      <button onClick={() => setStep(2)} className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2">
+                        Pay ₹{plan.amount} via UPI <ArrowLeft className="w-4 h-4 rotate-180" />
+                      </button>
+                      
+                      <RazorpayPayment 
+                        selectedPlan={selectedPlan}
+                        onSuccess={() => {
+                          refreshProfile();
+                          navigate('/dashboard');
+                        }}
+                        onCancel={() => setStep(1)}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div>
