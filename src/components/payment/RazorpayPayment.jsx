@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Star, Shield, Smartphone, Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
+import { Shield, Smartphone, Loader2, AlertCircle, CreditCard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { createRazorpayOrder, verifyRazorpayPayment } from '../../lib/api';
 
 const RazorpayPayment = ({ selectedPlan, onSuccess, onCancel }) => {
   const { user, refreshProfile } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,7 +41,7 @@ const RazorpayPayment = ({ selectedPlan, onSuccess, onCancel }) => {
           handler: async function(response) {
             try {
               // Verify payment
-              const { data: verifyData, error: verifyError } = await verifyRazorpayPayment(
+              const { error: verifyError } = await verifyRazorpayPayment(
                 response.razorpay_order_id,
                 response.razorpay_payment_id,
                 response.razorpay_signature,
