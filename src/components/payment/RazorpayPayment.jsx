@@ -32,7 +32,7 @@ const RazorpayPayment = ({ selectedPlan, onSuccess, onCancel }) => {
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => {
         const options = {
-          key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'YOUR_RAZORPAY_KEY_ID',
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID,
           amount: orderData.amount,
           currency: orderData.currency,
           name: 'ShikshaSetu',
