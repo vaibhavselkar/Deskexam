@@ -4,7 +4,6 @@ const Razorpay = require('razorpay');
 const authMiddleware = require('../middleware/auth');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
-const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -106,19 +105,6 @@ router.post('/verify-payment', async (req, res) => {
       };
       
       await user.save();
-
-      // Send payment confirmation email
-      try {
-        const plans = {
-          monthly: { label: 'Monthly Pro', duration: '30 days' },
-          yearly: { label: 'Yearly Pro', duration: '365 days' }
-        };
-        
-        await emailService.sendPaymentConfirmation(user, plans[planType], amount);
-      } catch (emailError) {
-        console.error('Payment confirmation email failed:', emailError);
-        // Email failure shouldn't block the payment process
-      }
     }
 
     res.json({

@@ -1,16 +1,20 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
-const emailService = require('../services/emailService');
 
 const router = express.Router();
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
+const createTransporter = () => nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
+});
 
 const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:3001';
 
@@ -30,11 +34,13 @@ router.post('/register', async (req, res) => {
 
     const verifyUrl = `${FRONTEND}/auth?verify=${verifyToken}`;
     try {
-      await emailService.sendVerificationEmail(user, verifyUrl);
-    } catch (emailError) {
-      console.error('Verification email failed:', emailError);
-      // Email failure shouldn't block registration, but log it
-    }
+      await createTransporter().sendMail({
+        from: `Deskexam <${process.env.GMAIL_USER}>`,
+        to: email,
+        subject: 'Verify your Deskexam email',
+        html: `<p>Hi ${fullName},</p><p>Please verify your email address by clicking the link below:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>This link does not expire. If you didn't create an account, ignore this email.</p>`,
+      });
+    } catch (_) { /* email failure shouldn't block registration */ }
 
     const token = signToken(user._id);
     res.status(201).json({ token, user });
@@ -71,7 +77,12 @@ router.post('/resend-verification', async (req, res) => {
     await user.save();
 
     const verifyUrl = `${FRONTEND}/auth?verify=${verifyToken}`;
-    await emailService.sendVerificationEmail(user, verifyUrl);
+    await createTransporter().sendMail({
+      from: `Deskexam <${process.env.GMAIL_USER}>`,
+      to: user.email,
+      subject: 'Verify your Deskexam email',
+      html: `<p>Hi ${user.fullName},</p><p>Click below to verify your email:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
+    });
     res.json({ message: 'Verification email resent.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -140,7 +151,12 @@ router.post('/forgot-password', async (req, res) => {
 
     const resetUrl = `${FRONTEND}/auth?reset=${token}`;
 
-    await emailService.sendPasswordResetEmail(user, resetUrl);
+    await createTransporter().sendMail({
+      from: `Deskexam <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: 'Reset your Deskexam password',
+      html: `<p>Hello ${user.fullName},</p><p>Click the link below to reset your password. It expires in 1 hour.</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you didn't request this, ignore this email.</p>`,
+    });
 
     res.json({ message: 'Reset link sent to your email.' });
   } catch (err) {
