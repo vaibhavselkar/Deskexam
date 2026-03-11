@@ -14,6 +14,7 @@ const allowedOrigins = [
   'http://localhost:3001',
   'https://shikshasetu-seven.vercel.app',
   'https://deskexam.com',
+  'https://api.deskexam.com',
   'https://www.deskexam.com',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
