@@ -20,6 +20,12 @@ router.post('/create-order', async (req, res) => {
   try {
     const { planType, amount } = req.body;
 
+    console.log('Creating order with:', { planType, amount, userId: req.userId });
+    console.log('Razorpay config:', {
+      keyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
+      keySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
+    });
+
     if (!planType || !amount) {
       return res.status(400).json({ message: 'Plan type and amount are required' });
     }
@@ -45,7 +51,15 @@ router.post('/create-order', async (req, res) => {
       }
     };
 
+    console.log('Order options:', options);
+
     const order = await razorpay.orders.create(options);
+    
+    console.log('Order created successfully:', {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency
+    });
     
     res.json({
       orderId: order.id,
@@ -54,8 +68,26 @@ router.post('/create-order', async (req, res) => {
       planType
     });
   } catch (err) {
-    console.error('Razorpay order creation error:', err);
-    res.status(500).json({ message: 'Failed to create order' });
+    console.error('Razorpay order creation error:', {
+      message: err.message,
+      statusCode: err.statusCode,
+      description: err.error?.description,
+      code: err.error?.code,
+      stack: err.stack
+    });
+    
+    // Provide more specific error messages
+    if (err.statusCode === 401) {
+      return res.status(500).json({ 
+        message: 'Payment gateway authentication failed. Please contact support.',
+        error: 'RAZORPAY_AUTH_ERROR'
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to create order',
+      error: err.message 
+    });
   }
 });
 
