@@ -139,13 +139,9 @@ router.post('/verify-payment', async (req, res) => {
       const planDuration = planType === 'monthly' ? 30 : 365;
       const expiryDate = new Date(now.getTime() + planDuration * 24 * 60 * 60 * 1000);
       
-      user.subscription = {
-        planType,
-        isActive: true,
-        startDate: now,
-        expiryDate: expiryDate,
-        paymentMethod: 'razorpay'
-      };
+      // Update subscription fields to match the User model
+      user.subscriptionStatus = planType;
+      user.subscriptionEnd = expiryDate;
       
       await user.save();
     }
