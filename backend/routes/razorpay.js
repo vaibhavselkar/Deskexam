@@ -13,6 +13,11 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+console.log('Razorpay initialized with:', {
+  keyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
+  keySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
+});
+
 router.use(authMiddleware);
 
 // Create Razorpay order
