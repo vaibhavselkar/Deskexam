@@ -122,6 +122,12 @@ router.post('/verify-payment', async (req, res) => {
       return res.status(400).json({ message: 'Invalid signature' });
     }
 
+    // Check if transaction already exists
+    const existingTransaction = await Transaction.findOne({ utrNumber: razorpay_payment_id });
+    if (existingTransaction) {
+      return res.status(400).json({ message: 'Payment already verified' });
+    }
+
     // Create transaction record
     const transaction = await Transaction.create({
       userId: req.userId,
@@ -153,6 +159,43 @@ router.post('/verify-payment', async (req, res) => {
   } catch (err) {
     console.error('Payment verification error:', err);
     res.status(500).json({ message: 'Payment verification failed' });
+  }
+});
+
+// Admin endpoint to manually update subscription (for testing)
+router.post('/admin/update-subscription', async (req, res) => {
+  try {
+    const { userId, planType } = req.body;
+
+    if (!userId || !planType) {
+      return res.status(400).json({ message: 'User ID and plan type are required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const now = new Date();
+    const planDuration = planType === 'monthly' ? 30 : 365;
+    const expiryDate = new Date(now.getTime() + planDuration * 24 * 60 * 60 * 1000);
+    
+    user.subscriptionStatus = planType;
+    user.subscriptionEnd = expiryDate;
+    
+    await user.save();
+
+    res.json({
+      message: 'Subscription updated successfully',
+      user: {
+        id: user._id,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionEnd: user.subscriptionEnd
+      }
+    });
+  } catch (err) {
+    console.error('Admin subscription update error:', err);
+    res.status(500).json({ message: 'Failed to update subscription' });
   }
 });
 
