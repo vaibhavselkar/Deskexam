@@ -69,7 +69,7 @@ function normalizeUser(u) {
     id: u._id || u.id,
     full_name: u.fullName || u.full_name,
     subscription_status: u.subscriptionStatus || u.subscription_status || 'free',
-    subscription_end: u.subscriptionEnd || u.subscription_end,
+    subscription_end: u.subscriptionEnd ?? u.subscription_end ?? null,
     total_papers_created: u.totalPapersCreated ?? u.total_papers_created ?? 0,
     institute_name: u.instituteName || u.institute_name || '',
     credits: u.credits ?? 3,
