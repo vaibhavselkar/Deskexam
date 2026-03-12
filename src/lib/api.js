@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+console.log('API Base URL:', BASE_URL);
+
 const api = axios.create({ baseURL: BASE_URL });
 
 // Attach JWT to every request
@@ -240,6 +242,11 @@ export const extractPdfWithGemini = async (file) => {
 // Razorpay Payment APIs
 export const createRazorpayOrder = async (planType, amount) => {
   try {
+    const token = localStorage.getItem('ss_token');
+    if (!token) {
+      throw new Error('Authentication required. Please sign in first.');
+    }
+    
     const { data } = await api.post('/razorpay/create-order', { planType, amount });
     return { data, error: null };
   } catch (err) {
@@ -249,6 +256,11 @@ export const createRazorpayOrder = async (planType, amount) => {
 
 export const verifyRazorpayPayment = async (razorpay_order_id, razorpay_payment_id, razorpay_signature, planType) => {
   try {
+    const token = localStorage.getItem('ss_token');
+    if (!token) {
+      throw new Error('Authentication required. Please sign in first.');
+    }
+    
     const { data } = await api.post('/razorpay/verify-payment', { 
       razorpay_order_id, 
       razorpay_payment_id, 

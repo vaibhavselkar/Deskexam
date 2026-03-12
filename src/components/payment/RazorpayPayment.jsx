@@ -20,8 +20,19 @@ const RazorpayPayment = ({ selectedPlan, onSuccess, onCancel }) => {
     setError('');
 
     try {
+      // Check if user is authenticated
+      const token = localStorage.getItem('ss_token');
+      console.log('Token found:', !!token);
+      if (!token) {
+        throw new Error('Authentication required. Please sign in first.');
+      }
+
+      console.log('Creating Razorpay order for:', { selectedPlan, amount: plan.amount });
+      
       // Create Razorpay order
       const { data: orderData, error: orderError } = await createRazorpayOrder(selectedPlan, plan.amount);
+      
+      console.log('Order creation result:', { orderData, orderError });
       
       if (orderError) {
         throw new Error(orderError.message || 'Failed to create payment order');

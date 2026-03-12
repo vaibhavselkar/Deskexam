@@ -115,7 +115,7 @@ router.post('/verify-payment', async (req, res) => {
     const transaction = await Transaction.create({
       userId: req.userId,
       planType,
-      amount: parseInt(razorpay.amount) / 100, // Convert back to rupees
+      amount: planType === 'monthly' ? 200 : 2000, // Use the plan amount
       utrNumber: razorpay_payment_id,
       paymentMethod: 'razorpay',
       status: 'verified'
