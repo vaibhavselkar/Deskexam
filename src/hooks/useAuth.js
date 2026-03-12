@@ -27,6 +27,7 @@ export function AuthProvider({ children }) {
       const normalized = normalizeUser(data);
       setUser(normalized);
       setProfile(normalized);
+      console.log('User data loaded:', normalized);
     }
     setLoading(false);
   };
