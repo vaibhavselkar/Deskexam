@@ -31,6 +31,12 @@ router.post('/create-order', async (req, res) => {
       keySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
     });
 
+    // Debug: Log the actual keys (be careful with this in production)
+    console.log('Razorpay keys for debugging:', {
+      keyId: process.env.RAZORPAY_KEY_ID,
+      keySecretLength: process.env.RAZORPAY_KEY_SECRET?.length || 0
+    });
+
     if (!planType || !amount) {
       return res.status(400).json({ message: 'Plan type and amount are required' });
     }
