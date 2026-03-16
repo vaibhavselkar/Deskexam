@@ -198,7 +198,8 @@ export default function Dashboard() {
                   action: 'Create & Download',
                   route: '/editor',
                 },
-                {
+                // Only show the "Unlimited with Pro" card if user is not subscribed
+                !isSubscribed && {
                   icon: <TrendingUp className="w-5 h-5" />,
                   color: 'bg-green-50 text-green-600',
                   title: 'Unlimited with Pro',
@@ -206,7 +207,7 @@ export default function Dashboard() {
                   action: 'See Plans',
                   route: '/payment',
                 },
-              ].map((feat, i) => (
+              ].filter(Boolean).map((feat, i) => (
                 <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all flex flex-col gap-3">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${feat.color}`}>
                     {feat.icon}
